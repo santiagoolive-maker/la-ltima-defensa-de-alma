@@ -1,0 +1,24 @@
+{
+    "name": "La Última Defensa de Alma",
+    "description": "Damián protege a Alma, cuya sangre tiene la cura del virus, de los infectados y de la organización 2:12.",
+    "dependencies": {
+        "device": "*"
+    },
+    "files": [
+        "main.blocks",
+        "main.ts",
+        "README.md",
+        "assets.json"
+    ],
+    "testFiles": [
+        "test.ts"
+    ],
+    "targetVersions": {
+        "target": "4.1.25",
+        "targetId": "arcade"
+    },
+    "supportedTargets": [
+        "arcade"
+    ],
+    "preferredEditor": "tsprj"
+}
