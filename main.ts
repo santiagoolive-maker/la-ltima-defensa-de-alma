@@ -60,21 +60,24 @@ function crearInfectado (rapidez: number) {
 }
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (puedeJugar) {
-        angulo = randint(0, 359)
-        vx = Math.cos(angulo * Math.PI / 180) * 110
-        vy = Math.sin(angulo * Math.PI / 180) * 110
-        if (nivel == 4 && jefe != null && vidaJefe > 0) {
-            dx = jefe.x - damian.x
-            dy = jefe.y - damian.y
-            distancia = Math.max(1, Math.sqrt(dx * dx + dy * dy))
-            vx = dx / distancia * 140
-            vy = dy / distancia * 140
+        let disparoX = 110
+        let disparoY = 0
+        if (controller.left.isPressed()) {
+            disparoX = -110
+        } else if (controller.right.isPressed()) {
+            disparoX = 110
+        } else if (controller.up.isPressed()) {
+            disparoX = 0
+            disparoY = -110
+        } else if (controller.down.isPressed()) {
+            disparoX = 0
+            disparoY = 110
         }
         disparo = sprites.createProjectileFromSprite(img`
             f f f f . 
             f 5 5 5 f 
             f f f f . 
-            `, damian, vx, vy)
+            `, damian, disparoX, disparoY)
         disparo.lifespan = 900
         music.playTone(523, music.beat(BeatFraction.Sixteenth))
     }
@@ -256,13 +259,7 @@ let dx2 = 0
 let proximoDano = 0
 let barraJefe: Sprite = null
 let disparo: Sprite = null
-let distancia = 0
-let dy = 0
-let dx = 0
 let jefe: Sprite = null
-let vy = 0
-let vx = 0
-let angulo = 0
 let infectado: Sprite = null
 let eliminados = 0
 let puedeJugar = false
@@ -335,14 +332,24 @@ game.onUpdateInterval(1400, function () {
     dy2 = damian.y - jefe.y
     distancia2 = Math.max(1, Math.sqrt(dx2 * dx2 + dy2 * dy2))
     let rapidez = vidaJefe <= 10 ? 75 : 50
-veneno2 = sprites.createProjectileFromSprite(img`
+    let velocidadX = dx2 / distancia2 * rapidez
+    let velocidadY = dy2 / distancia2 * rapidez
+    veneno2 = sprites.createProjectileFromSprite(img`
         . 7 7 . 
         7 5 5 7 
         7 5 5 7 
         . 7 7 . 
-        `, jefe, dx2 / distancia2 * rapidez, dy2 / distancia2 * rapidez)
+        `, jefe, velocidadX - velocidadY * 0.35, velocidadY + velocidadX * 0.35)
     veneno2.setKind(SpriteKind.Veneno)
     veneno2.lifespan = 3000
+    let veneno3 = sprites.createProjectileFromSprite(img`
+        . 7 7 . 
+        7 5 5 7 
+        7 5 5 7 
+        . 7 7 . 
+        `, jefe, velocidadX + velocidadY * 0.35, velocidadY - velocidadX * 0.35)
+    veneno3.setKind(SpriteKind.Veneno)
+    veneno3.lifespan = 3000
 })
 
 // Música de suspenso: cambia durante la pelea contra el jefe.
@@ -356,4 +363,5 @@ game.onUpdateInterval(7000, function () {
         music.playMelody("E D E G E D C D ", 160)
     }
 })
+
 
