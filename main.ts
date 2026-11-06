@@ -94,7 +94,7 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Jefe, function (bala, enemig
         return
     }
     bala.destroy(effects.disintegrate, 50)
-    vidaJefe += 0 - 1
+    vidaJefe += -1
     info.changeScoreBy(1)
     actualizarBarraJefe()
     if (vidaJefe == 10) {
@@ -109,7 +109,7 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Jefe, function (bala, enemig
             veneno.destroy()
         }
         info.changeScoreBy(50)
-        game.showLongText("¡Venciste al Paciente Cero! Damian y Alma escaparon. La cura esta a salvo.", DialogLayout.Full)
+        game.showLongText("¡Venciste al Paciente Cero! Damián y Alma escaparon. La cura está a salvo.", DialogLayout.Full)
         game.over(true, effects.confetti)
     }
 })
@@ -123,6 +123,8 @@ function comenzarNivel () {
     }
     if (nivel == 1) {
         scene.cameraFollowSprite(damian)
+        damian.setStayInScreen(true)
+        alma.setStayInScreen(true)
         tiles.setCurrentTilemap(tilemap`nivel1`)
         objetivo = 5
         game.showLongText("NIVEL 1: Ciudad infectada", DialogLayout.Bottom)
@@ -130,6 +132,9 @@ function comenzarNivel () {
             crearInfectado(18)
         }
     } else if (nivel == 2) {
+        scene.cameraFollowSprite(damian)
+        damian.setStayInScreen(true)
+        alma.setStayInScreen(true)
         tiles.setCurrentTilemap(tilemap`nivel2`)
         objetivo = 11
         game.showLongText("NIVEL 2: El grupo 2:12 encontró el refugio", DialogLayout.Bottom)
@@ -137,6 +142,9 @@ function comenzarNivel () {
             crearInfectado(28)
         }
     } else if (nivel == 3) {
+        scene.cameraFollowSprite(damian)
+        damian.setStayInScreen(true)
+        alma.setStayInScreen(true)
         tiles.setCurrentTilemap(tilemap`nivel3`)
         objetivo = 18
         game.showLongText("NIVEL 3: Resiste hasta que llegue la ayuda", DialogLayout.Bottom)
@@ -191,18 +199,20 @@ info.onLifeZero(function () {
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Jefe, function (jugador, enemigo) {
     recibirDanoJefe(1)
 })
-// NIVEL 4: arena propia, sin extensiones ni un recurso nivel4.
 function comenzarJefe () {
-    scene.cameraFollowSprite(null)
-    tiles.setCurrentTilemap(tiles.createTilemap(hex`0a0008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000`, image.create(10, 8), [image.create(16, 16)], TileScale.Sixteen))
-    scene.centerCameraAt(80, 60)
+    // Corrección: la cámara ahora sigue a Damián.
+    scene.cameraFollowSprite(damian)
+    // Corrección: Damián y Alma pueden recorrer el mapa completo.
+    damian.setStayInScreen(false)
+    alma.setStayInScreen(false)
+    // Dejá solamente el mapa real del jefe.
     tiles.setCurrentTilemap(tilemap`level2`)
     damian.setPosition(35, 85)
     alma.setPosition(18, 95)
     info.setLife(5)
     vidaJefe = 20
     proximoDano = 0
-    game.showLongText("NIVEL 4: EL PACIENTE CERO. Protege a Alma, esquiva el veneno y pulsa A para disparar al jefe. Al perder media vida se vuelve mas rapido.", DialogLayout.Full)
+    game.showLongText("NIVEL 4: EL PACIENTE CERO. Protege a Alma, esquiva el veneno y pulsa A para disparar al jefe. Al perder media vida se vuelve más rápido.", DialogLayout.Full)
     jefe = sprites.create(img`
         ..22................22..
         ..222..............222..
@@ -231,7 +241,8 @@ function comenzarJefe () {
         `, SpriteKind.Jefe)
     jefe.setPosition(120, 30)
     jefe.setFlag(SpriteFlag.GhostThroughWalls, true)
-    jefe.setStayInScreen(true)
+    // El jefe también puede moverse por el mapa.
+    jefe.setStayInScreen(false)
     jefe.follow(damian, 15)
     barraJefe = sprites.create(image.create(34, 5), SpriteKind.BarraJefe)
     barraJefe.setFlag(SpriteFlag.Ghost, true)
@@ -306,7 +317,7 @@ damian.setStayInScreen(true)
 alma.setStayInScreen(true)
 info.setLife(5)
 info.setScore(0)
-game.splash("LA ÚLTIMA DEFENSA DE ALMA", "A: dispara | W,A,S,D: mover")
+game.splash("LA ÚLTIMA DEFENSA DE ALMA", "A: dispara | Flechas: mover")
 game.showLongText("Damián protege a Alma. Su sangre contiene la cura del virus y 2:12 quiere secuestrarla.", DialogLayout.Full)
 puedeJugar = true
 comenzarNivel()
