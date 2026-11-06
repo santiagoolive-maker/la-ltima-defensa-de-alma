@@ -317,6 +317,7 @@ damian.setStayInScreen(true)
 alma.setStayInScreen(true)
 info.setLife(5)
 info.setScore(0)
+music.setVolume(35)
 game.splash("LA ÚLTIMA DEFENSA DE ALMA", "A: dispara | Flechas: mover")
 game.showLongText("Damián protege a Alma. Su sangre contiene la cura del virus y 2:12 quiere secuestrarla.", DialogLayout.Full)
 puedeJugar = true
@@ -343,3 +344,16 @@ veneno2 = sprites.createProjectileFromSprite(img`
     veneno2.setKind(SpriteKind.Veneno)
     veneno2.lifespan = 3000
 })
+
+// Música de suspenso: cambia durante la pelea contra el jefe.
+game.onUpdateInterval(7000, function () {
+    if (!(puedeJugar)) {
+        return
+    }
+    if (nivel == 4) {
+        music.playMelody("C B A G A B C5 B ", 180)
+    } else {
+        music.playMelody("E D E G E D C D ", 160)
+    }
+})
+
