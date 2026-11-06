@@ -1,3 +1,82 @@
+main.ts:328: trailing whitespace.
++    let velocidadX = dx2 / distancia2 * rapidez
+main.ts:329: trailing whitespace.
++    let velocidadY = dy2 / distancia2 * rapidez
+main.ts:330: trailing whitespace.
++    veneno2 = sprites.createProjectileFromSprite(img`
+main.ts:335: trailing whitespace.
++        `, jefe, velocidadX - velocidadY * 0.35, velocidadY + velocidadX * 0.35)
+main.ts:338: trailing whitespace.
++    let veneno3 = sprites.createProjectileFromSprite(img`
+main.ts:339: trailing whitespace.
++        . 7 7 . 
+main.ts:340: trailing whitespace.
++        7 5 5 7 
+main.ts:341: trailing whitespace.
++        7 5 5 7 
+main.ts:342: trailing whitespace.
++        . 7 7 . 
+main.ts:343: trailing whitespace.
++        `, jefe, velocidadX + velocidadY * 0.35, velocidadY - velocidadX * 0.35)
+main.ts:344: trailing whitespace.
++    veneno3.setKind(SpriteKind.Veneno)
+main.ts:345: trailing whitespace.
++    veneno3.lifespan = 3000
+diff --git a/main.ts b/main.ts
+index 9d4d263..219c9bd 100644
+--- a/main.ts
++++ b/main.ts
+@@ -63,13 +63,6 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
+         angulo = randint(0, 359)
+         vx = Math.cos(angulo * Math.PI / 180) * 110
+         vy = Math.sin(angulo * Math.PI / 180) * 110
+-        if (nivel == 4 && jefe != null && vidaJefe > 0) {
+-            dx = jefe.x - damian.x
+-            dy = jefe.y - damian.y
+-            distancia = Math.max(1, Math.sqrt(dx * dx + dy * dy))
+-            vx = dx / distancia * 140
+-            vy = dy / distancia * 140
+-        }
+         disparo = sprites.createProjectileFromSprite(img`
+             f f f f . 
+             f 5 5 5 f 
+@@ -256,9 +249,6 @@ let dx2 = 0
+ let proximoDano = 0
+ let barraJefe: Sprite = null
+ let disparo: Sprite = null
+-let distancia = 0
+-let dy = 0
+-let dx = 0
+ let jefe: Sprite = null
+ let vy = 0
+ let vx = 0
+@@ -335,14 +325,24 @@ game.onUpdateInterval(1400, function () {
+     dy2 = damian.y - jefe.y
+     distancia2 = Math.max(1, Math.sqrt(dx2 * dx2 + dy2 * dy2))
+     let rapidez = vidaJefe <= 10 ? 75 : 50
+-veneno2 = sprites.createProjectileFromSprite(img`
++    let velocidadX = dx2 / distancia2 * rapidez
++    let velocidadY = dy2 / distancia2 * rapidez
++    veneno2 = sprites.createProjectileFromSprite(img`
+         . 7 7 . 
+         7 5 5 7 
+         7 5 5 7 
+         . 7 7 . 
+-        `, jefe, dx2 / distancia2 * rapidez, dy2 / distancia2 * rapidez)
++        `, jefe, velocidadX - velocidadY * 0.35, velocidadY + velocidadX * 0.35)
+     veneno2.setKind(SpriteKind.Veneno)
+     veneno2.lifespan = 3000
++    let veneno3 = sprites.createProjectileFromSprite(img`
++        . 7 7 . 
++        7 5 5 7 
++        7 5 5 7 
++        . 7 7 . 
++        `, jefe, velocidadX + velocidadY * 0.35, velocidadY - velocidadX * 0.35)
++    veneno3.setKind(SpriteKind.Veneno)
++    veneno3.lifespan = 3000
+ })
+ 
+ // Música de suspenso: cambia durante la pelea contra el jefe.
 namespace SpriteKind {
     export const Infectado = SpriteKind.create()
     export const Alma = SpriteKind.create()
@@ -60,24 +139,14 @@ function crearInfectado (rapidez: number) {
 }
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (puedeJugar) {
-        let disparoX = 110
-        let disparoY = 0
-        if (controller.left.isPressed()) {
-            disparoX = -110
-        } else if (controller.right.isPressed()) {
-            disparoX = 110
-        } else if (controller.up.isPressed()) {
-            disparoX = 0
-            disparoY = -110
-        } else if (controller.down.isPressed()) {
-            disparoX = 0
-            disparoY = 110
-        }
+        angulo = randint(0, 359)
+        vx = Math.cos(angulo * Math.PI / 180) * 110
+        vy = Math.sin(angulo * Math.PI / 180) * 110
         disparo = sprites.createProjectileFromSprite(img`
             f f f f . 
             f 5 5 5 f 
             f f f f . 
-            `, damian, disparoX, disparoY)
+            `, damian, vx, vy)
         disparo.lifespan = 900
         music.playTone(523, music.beat(BeatFraction.Sixteenth))
     }
@@ -260,6 +329,9 @@ let proximoDano = 0
 let barraJefe: Sprite = null
 let disparo: Sprite = null
 let jefe: Sprite = null
+let vy = 0
+let vx = 0
+let angulo = 0
 let infectado: Sprite = null
 let eliminados = 0
 let puedeJugar = false
