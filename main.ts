@@ -58,20 +58,6 @@ function crearInfectado (rapidez: number) {
     infectado.setPosition(randint(10, 150), randint(10, 110))
     infectado.follow(damian, rapidez)
 }
-controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (puedeJugar) {
-        angulo = randint(0, 359)
-        vx = Math.cos(angulo * Math.PI / 180) * 110
-        vy = Math.sin(angulo * Math.PI / 180) * 110
-        disparo = sprites.createProjectileFromSprite(img`
-            f f f f . 
-            f 5 5 5 f 
-            f f f f . 
-            `, damian, vx, vy)
-        disparo.lifespan = 900
-        music.playTone(523, music.beat(BeatFraction.Sixteenth))
-    }
-})
 function actualizarBarraJefe () {
     barraJefe.image.fill(1)
     barraJefe.image.fillRect(1, 1, 32, 3, 15)
@@ -87,7 +73,7 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Jefe, function (bala, enemig
         return
     }
     bala.destroy(effects.disintegrate, 50)
-    vidaJefe += -1
+    vidaJefe += 0 - 1
     info.changeScoreBy(1)
     actualizarBarraJefe()
     if (vidaJefe == 10) {
@@ -98,9 +84,7 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Jefe, function (bala, enemig
         puedeJugar = false
         jefe.destroy(effects.disintegrate, 500)
         barraJefe.destroy()
-        for (let veneno of sprites.allOfKind(SpriteKind.Veneno)) {
-            veneno.destroy()
-        }
+        sprites.destroyAllSpritesOfKind(SpriteKind.Veneno)
         info.changeScoreBy(50)
         game.showLongText("¡Venciste al Paciente Cero! Damián y Alma escaparon. La cura está a salvo.", DialogLayout.Full)
         game.over(true, effects.confetti)
@@ -108,47 +92,61 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Jefe, function (bala, enemig
 })
 function comenzarNivel () {
     puedeJugar = false
-    for (let bala of sprites.allOfKind(SpriteKind.Projectile)) {
-        bala.destroy()
+    sprites.destroyAllSpritesOfKind(SpriteKind.Projectile)
+    sprites.destroyAllSpritesOfKind(SpriteKind.Infectado)
+    if (nivel == 4) {
+        comenzarJefe()
+        puedeJugar = true
+        return
     }
-    for (let enemigo of sprites.allOfKind(SpriteKind.Infectado)) {
-        enemigo.destroy()
-    }
+    scene.cameraFollowSprite(damian)
+    damian.setStayInScreen(true)
+    alma.setStayInScreen(true)
     if (nivel == 1) {
-        scene.cameraFollowSprite(damian)
-        damian.setStayInScreen(true)
-        alma.setStayInScreen(true)
         tiles.setCurrentTilemap(tilemap`nivel1`)
         objetivo = 5
         game.showLongText("NIVEL 1: Ciudad infectada", DialogLayout.Bottom)
-        for (let index = 0; index < 5; index++) {
-            crearInfectado(18)
-        }
+        cantidad = 5
+        rapidez = 18
     } else if (nivel == 2) {
-        scene.cameraFollowSprite(damian)
-        damian.setStayInScreen(true)
-        alma.setStayInScreen(true)
         tiles.setCurrentTilemap(tilemap`nivel2`)
         objetivo = 11
         game.showLongText("NIVEL 2: El grupo 2:12 encontró el refugio", DialogLayout.Bottom)
-        for (let index = 0; index < 6; index++) {
-            crearInfectado(28)
-        }
+        cantidad = 6
+        rapidez = 28
     } else if (nivel == 3) {
-        scene.cameraFollowSprite(damian)
-        damian.setStayInScreen(true)
-        alma.setStayInScreen(true)
         tiles.setCurrentTilemap(tilemap`nivel3`)
         objetivo = 18
         game.showLongText("NIVEL 3: Resiste hasta que llegue la ayuda", DialogLayout.Bottom)
-        for (let index = 0; index < 7; index++) {
-            crearInfectado(40)
-        }
-    } else if (nivel == 4) {
-        comenzarJefe()
+        cantidad = 7
+        rapidez = 40
+    }
+    for (let index = 0; index < cantidad; index++) {
+        crearInfectado(rapidez)
     }
     puedeJugar = true
 }
+controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (puedeJugar) {
+        angulo = randint(0, 359)
+        vx = Math.cos(angulo * Math.PI / 180) * 110
+        vy = Math.sin(angulo * Math.PI / 180) * 110
+        if (nivel == 4 && jefe != null && vidaJefe > 0) {
+            dx = jefe.x - damian.x
+            dy = jefe.y - damian.y
+            distancia = Math.max(1, Math.sqrt(dx * dx + dy * dy))
+            vx = dx / distancia * 140
+            vy = dy / distancia * 140
+        }
+        disparo = sprites.createProjectileFromSprite(img`
+            f f f f . 
+            f 5 5 5 f 
+            f f f f . 
+            `, damian, vx, vy)
+        disparo.lifespan = 900
+        music.playTone(523, music.beat(BeatFraction.Sixteenth))
+    }
+})
 function pasarDeNivel () {
     if (!(puedeJugar)) {
         return
@@ -247,22 +245,26 @@ let distancia2 = 0
 let dy2 = 0
 let dx2 = 0
 let proximoDano = 0
-let barraJefe: Sprite = null
 let disparo: Sprite = null
-let jefe: Sprite = null
+let distancia = 0
+let dy = 0
+let dx = 0
 let vy = 0
 let vx = 0
 let angulo = 0
+let rapidez = 0
+let cantidad = 0
+let jefe: Sprite = null
+let barraJefe: Sprite = null
 let infectado: Sprite = null
+let objetivo = 0
 let eliminados = 0
 let puedeJugar = false
 let alma: Sprite = null
 let damian: Sprite = null
-let objetivo = 0
 let nivel = 0
 let vidaJefe = 0
 nivel = 1
-objetivo = 5
 damian = sprites.create(img`
     . . . . . . f f f f . . . . . . 
     . . . . f f f 2 2 f f f . . . . 
@@ -307,10 +309,8 @@ damian.setStayInScreen(true)
 alma.setStayInScreen(true)
 info.setLife(5)
 info.setScore(0)
-music.setVolume(35)
 game.splash("LA ÚLTIMA DEFENSA DE ALMA", "A: dispara | Flechas: mover")
 game.showLongText("Damián protege a Alma. Su sangre contiene la cura del virus y 2:12 quiere secuestrarla.", DialogLayout.Full)
-puedeJugar = true
 comenzarNivel()
 game.onUpdate(function () {
     if (nivel == 4 && puedeJugar && vidaJefe > 0) {
@@ -324,37 +324,13 @@ game.onUpdateInterval(1400, function () {
     dx2 = damian.x - jefe.x
     dy2 = damian.y - jefe.y
     distancia2 = Math.max(1, Math.sqrt(dx2 * dx2 + dy2 * dy2))
-    let rapidez = vidaJefe <= 10 ? 75 : 50
-    let velocidadX = dx2 / distancia2 * rapidez
-    let velocidadY = dy2 / distancia2 * rapidez
-    veneno2 = sprites.createProjectileFromSprite(img`
+    let rapidez2 = vidaJefe <= 10 ? 75 : 50
+veneno2 = sprites.createProjectileFromSprite(img`
         . 7 7 . 
         7 5 5 7 
         7 5 5 7 
         . 7 7 . 
-        `, jefe, velocidadX - velocidadY * 0.35, velocidadY + velocidadX * 0.35)
+        `, jefe, dx2 / distancia2 * rapidez2, dy2 / distancia2 * rapidez2)
     veneno2.setKind(SpriteKind.Veneno)
     veneno2.lifespan = 3000
-    let veneno3 = sprites.createProjectileFromSprite(img`
-        . 7 7 . 
-        7 5 5 7 
-        7 5 5 7 
-        . 7 7 . 
-        `, jefe, velocidadX + velocidadY * 0.35, velocidadY - velocidadX * 0.35)
-    veneno3.setKind(SpriteKind.Veneno)
-    veneno3.lifespan = 3000
 })
-
-// Música de suspenso: cambia durante la pelea contra el jefe.
-game.onUpdateInterval(7000, function () {
-    if (!(puedeJugar)) {
-        return
-    }
-    if (nivel == 4) {
-        music.playMelody("C B A G A B C5 B ", 180)
-    } else {
-        music.playMelody("E D E G E D C D ", 160)
-    }
-})
-
-
