@@ -171,10 +171,6 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Infectado, function (jugador, in
         pasarDeNivel()
     }
 })
-sprites.onOverlap(SpriteKind.Player, SpriteKind.Veneno, function (jugador, veneno) {
-    veneno.destroy()
-    recibirDanoJefe(1)
-})
 function recibirDanoJefe (cantidad: number) {
     if (!(puedeJugar) || game.runtime() < proximoDano) {
         return
@@ -318,14 +314,14 @@ game.onUpdate(function () {
     }
 })
 game.onUpdateInterval(1400, function () {
-    if (nivel != 4 || !(puedeJugar) || vidaJefe <= 0) {
+    let rapidez2 = vidaJefe <= 10 ? 75 : 50
+if (nivel != 4 || !(puedeJugar) || vidaJefe <= 0) {
         return
     }
     dx2 = damian.x - jefe.x
     dy2 = damian.y - jefe.y
     distancia2 = Math.max(1, Math.sqrt(dx2 * dx2 + dy2 * dy2))
-    let rapidez2 = vidaJefe <= 10 ? 75 : 50
-veneno2 = sprites.createProjectileFromSprite(img`
+    veneno2 = sprites.createProjectileFromSprite(img`
         . 7 7 . 
         7 5 5 7 
         7 5 5 7 
